@@ -55,8 +55,8 @@ input, textarea { width: 100%; color: var(--ink); background: #fff; border: 1px 
 .mini-map { position: relative; height: 260px; margin-top: 18px; overflow: hidden; background: linear-gradient(90deg, rgba(23, 59, 120, 0.06) 1px, transparent 1px), linear-gradient(rgba(23, 59, 120, 0.06) 1px, transparent 1px), #eaf0fa; background-size: 42px 42px; border-radius: 8px; }
 .pin, .car-dot { position: absolute; display: block; border-radius: 50%; } .pin { width: 18px; height: 18px; border: 4px solid #fff; box-shadow: 0 5px 14px rgba(0,0,0,0.18); }
 .pickup-pin { left: 18%; top: 64%; background: var(--primary); } .destination-pin { right: 18%; top: 24%; background: var(--danger); } .route-line { position: absolute; left: 22%; right: 22%; top: 48%; height: 6px; background: var(--accent); border-radius: 99px; transform: rotate(-20deg); } .car-dot { left: 18%; top: 64%; width: 22px; height: 22px; background: var(--ink); transition: all 700ms ease; } .car-dot.matched { left: 42%; top: 48%; } .car-dot.active { left: 74%; top: 26%; }
-.switch input { position: absolute; opacity: 0; } .switch span { display: block; width: 64px; height: 34px; padding: 4px; background: #c8d2dc; border-radius: 999px; } .switch span::before { content: ""; display: block; width: 26px; height: 26px; background: #fff; border-radius: 50%; transition: transform 180ms ease; } .switch input:checked + span { background: var(--primary); } .switch input:checked + span::before { transform: translateX(30px); }
-.stats { margin-top: 22px; } .stats div { flex: 1; padding: 16px; background: var(--wash); border-radius: 8px; } .stats span { display: block; color: var(--muted); font-size: 0.85rem; } .stats strong { display: block; margin-top: 6px; color: var(--primary); font-size: 1.5rem; }
+.switch input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; } .switch span { display: block; width: 64px; height: 34px; padding: 4px; background: #c8d2dc; border-radius: 999px; } .switch span::before { content: ""; display: block; width: 26px; height: 26px; background: #fff; border-radius: 50%; transition: transform 180ms ease; } .switch input:checked + span { background: var(--primary); } .switch input:checked + span::before { transform: translateX(30px); }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 22px; } .stats div { min-width: 0; padding: 16px; background: var(--wash); border-radius: 8px; } .stats span { display: block; color: var(--muted); font-size: 0.85rem; } .stats strong { display: block; margin-top: 6px; color: var(--primary); font-size: 1.5rem; }
 .request-list, .history-list { display: grid; gap: 12px; } .request-card, .history-card { display: grid; gap: 10px; padding: 16px; background: var(--wash); border: 1px solid var(--line); border-radius: 8px; } .request-card button { justify-self: start; } .empty-state { padding: 24px; text-align: center; background: var(--wash); border-radius: 8px; }
 .three-up { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .admin-workspace { grid-template-columns: 0.9fr 1.1fr; }
@@ -73,7 +73,7 @@ input, textarea { width: 100%; color: var(--ink); background: #fff; border: 1px 
 .fallback-marker.destination { background: var(--danger); }
 .fallback-marker.taxi { background: var(--accent); color: #ffffff; }
 @media (max-width: 920px) { .three-up, .admin-stats { grid-template-columns: 1fr; } }
-@media (max-width: 760px) { .app-shell { width: min(100% - 24px, 1120px); padding: 18px 0; } .topbar { display: grid; grid-template-columns: 1fr; align-items: stretch; gap: 12px; } .topbar .secondary-button { justify-self: stretch; } .role-grid, .workspace { grid-template-columns: minmax(0, 1fr); } .role-grid { margin-top: 28px; } .role-card { min-height: 136px; } .stats, .actions { align-items: stretch; flex-direction: column; } .wide-panel { grid-column: auto; } }
+@media (max-width: 760px) { .app-shell { width: min(100% - 24px, 1120px); padding: 18px 0; } .topbar { display: grid; grid-template-columns: 1fr; align-items: stretch; gap: 12px; } .topbar .secondary-button { justify-self: stretch; } .role-grid, .workspace { grid-template-columns: minmax(0, 1fr); } .role-grid { margin-top: 28px; } .role-card { min-height: 136px; } .actions { align-items: stretch; flex-direction: column; } .driver-control { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; } .driver-control .switch { justify-self: end; } .driver-control p { margin-bottom: 4px; } .wide-panel { grid-column: auto; } }
 /* Local Leaflet layout fallback so maps render correctly even if CDN CSS is blocked. */
 .leaflet-container { position: relative; overflow: hidden; background: #dfe8f2; outline-offset: 1px; font-family: Arial, Helvetica, sans-serif; }
 .leaflet-pane, .leaflet-tile, .leaflet-marker-icon, .leaflet-marker-shadow, .leaflet-tile-container, .leaflet-pane > svg, .leaflet-pane > canvas, .leaflet-zoom-box, .leaflet-image-layer, .leaflet-layer { position: absolute; left: 0; top: 0; }
@@ -118,5 +118,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   textarea { font-size: 16px; }
   .real-map { height: 300px; max-width: 100%; }
   .leaflet-container { max-width: 100%; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+  .stats div { padding: 14px; }
+  .location-button { margin-top: 12px; }
   .history-card, .request-card, .status-card { overflow-wrap: anywhere; }
 }

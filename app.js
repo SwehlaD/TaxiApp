@@ -233,12 +233,14 @@ function renderAdmin() {
     qs('#minimumFareInput').value = data.settings.minimumFare;
     qs('#driverCommissionInput').value = data.settings.driverCommission;
   }
+  qs('#adminVehicleField').style.display = qs('#adminUserRoleInput').value === 'driver' ? 'grid' : 'none';
   qs('#adminUserList').innerHTML = data.users.length ? data.users.map(renderAdminUser).join('') : '<div class="empty-state">No users yet.</div>';
   qs('#adminRideList').innerHTML = data.rides.length ? data.rides.slice().reverse().map(renderAdminRide).join('') : '<div class="empty-state">No rides yet.</div>';
   renderAdminSupport();
 }
-function renderAdminUser(user) { return '<div class="history-card"><span class="badge">' + escapeHtml(user.role) + '</span><strong>' + escapeHtml(user.name) + '</strong><span class="history-meta">Phone ' + escapeHtml(formatPhone(user.phone)) + (user.vehicle ? ' | ' + escapeHtml(user.vehicle) : '') + (user.online ? ' | Online' : '') + '</span></div>'; }
-function renderAdminRide(ride) { const passenger = data.users.find(function(user) { return user.id === ride.passengerId; }); const driver = data.users.find(function(user) { return user.id === ride.driverId; }); return '<div class="history-card"><span class="badge ' + (ride.status === 'completed' ? 'done' : ride.status === 'cancelled' ? 'cancelled' : 'waiting') + '">' + escapeHtml(ride.status) + '</span><strong>' + escapeHtml(ride.pickup) + ' to ' + escapeHtml(ride.destination) + '</strong><span class="history-meta">Passenger ' + escapeHtml(passenger ? passenger.name : 'Unknown') + ' | Driver ' + escapeHtml(driver ? driver.name : 'Unassigned') + ' | Fare ' + money(ride.fare) + ' | Platform ' + money(ride.platformFee || platformFee(ride.fare)) + '</span></div>'; }
+function renderAdminUser(user) { const locked = session && user.id === session.userId; return '<div class="history-card"><span class="badge">' + escapeHtml(user.role) + '</span><strong>' + escapeHtml(user.name) + '</strong><span class="history-meta">Phone ' + escapeHtml(formatPhone(user.phone)) + (user.vehicle ? ' | ' + escapeHtml(user.vehicle) : '') + (user.online ? ' | Online' : '') + '</span><div class="actions"><button class="danger-button delete-user" data-id="' + escapeHtml(user.id) + '" type="button"' + (locked ? ' disabled' : '') + '>' + (locked ? 'Current admin' : 'Delete user') + '</button></div></div>'; }
+function adminRideBadgeClass(status) { if (status === 'completed') return 'done'; if (status === 'cancelled') return 'cancelled'; if (['accepted', 'arrived', 'started'].includes(status)) return 'accepted'; return 'waiting'; }
+function renderAdminRide(ride) { const passenger = data.users.find(function(user) { return user.id === ride.passengerId; }); const driver = data.users.find(function(user) { return user.id === ride.driverId; }); return '<div class="history-card"><span class="badge ' + adminRideBadgeClass(ride.status) + '">' + escapeHtml(ride.status) + '</span><strong>' + escapeHtml(ride.pickup) + ' to ' + escapeHtml(ride.destination) + '</strong><span class="history-meta">Passenger ' + escapeHtml(passenger ? passenger.name : 'Unknown') + ' | Driver ' + escapeHtml(driver ? driver.name : 'Unassigned') + ' | Fare ' + money(ride.fare) + ' | Platform ' + money(ride.platformFee || platformFee(ride.fare)) + '</span></div>'; }
 async function savePricing(event) {
   event.preventDefault();
   const nextSettings = {
@@ -259,6 +261,49 @@ async function savePricing(event) {
   renderAdmin();
 }
 
+async function createAdminUser(event) {
+  event.preventDefault();
+  const submit = event.submitter || qs('#adminUserForm button[type="submit"]');
+  const message = qs('#adminUserMessage');
+  if (submit && submit.disabled) return;
+  setBusy(submit, true);
+  try {
+    const role = qs('#adminUserRoleInput').value;
+    const name = qs('#adminUserNameInput').value.trim();
+    const phone = normalizePhone(qs('#adminUserPhoneInput').value);
+    const password = qs('#adminUserPasswordInput').value;
+    const vehicle = qs('#adminUserVehicleInput').value.trim();
+    if (!name) throw new Error('Enter the user name.');
+    if (!isValidPhone(phone)) throw new Error('Enter a valid 10-digit phone number.');
+    if (password.length < 4) throw new Error('Password must be at least 4 characters.');
+    if (role === 'driver' && !vehicle) throw new Error('Enter vehicle details for the driver.');
+    data = normalizeData(await api('/api/admin/users', { method: 'POST', body: JSON.stringify({ role, name, phone, password, vehicle }) }));
+    qs('#adminUserForm').reset();
+    qs('#adminUserRoleInput').value = 'passenger';
+    message.textContent = 'User created. They can sign in now.';
+    message.classList.add('success-message');
+    renderAdmin();
+  } catch (error) {
+    message.classList.remove('success-message');
+    message.textContent = error.message || 'Could not create user.';
+  } finally {
+    setBusy(submit, false);
+  }
+}
+async function deleteAdminUser(userId) {
+  const user = data.users.find(function(candidate) { return candidate.id === userId; });
+  if (!user) return;
+  if (!confirm('Delete ' + user.name + ' from the app?')) return;
+  try {
+    data = normalizeData(await api('/api/admin/users/' + encodeURIComponent(userId), { method: 'DELETE' }));
+    qs('#adminUserMessage').classList.add('success-message');
+    qs('#adminUserMessage').textContent = 'User deleted.';
+    renderAdmin();
+  } catch (error) {
+    qs('#adminUserMessage').classList.remove('success-message');
+    qs('#adminUserMessage').textContent = error.message || 'Could not delete user.';
+  }
+}
 function renderAdminSupport() { const tickets = data.supportTickets.slice().reverse(); qs('#adminSupportList').innerHTML = tickets.length ? tickets.map(function(ticket) { const user = data.users.find(function(candidate) { return candidate.id === ticket.userId; }); return '<div class="history-card"><span class="badge waiting">' + escapeHtml(ticket.role) + '</span><strong>' + escapeHtml(user ? user.name : 'Unknown user') + '</strong><span>' + escapeHtml(ticket.message) + '</span><span class="history-meta">' + escapeHtml(ticket.createdAt) + ' | ' + escapeHtml(user ? formatPhone(user.phone) : 'No phone') + '</span></div>'; }).join('') : '<div class="empty-state">Customer service messages will appear here.</div>'; }
 async function submitSupport(event) { event.preventDefault(); const form = event.currentTarget; const messageInput = form.querySelector('textarea[name="message"]'); const status = form.querySelector('[data-support-message]'); const message = messageInput.value.trim(); await loadData(); const user = currentUser(); if (message.length < 8) { status.textContent = 'Please describe the issue in a little more detail.'; return; } data.supportTickets.push({ id: uid('support'), userId: user.id, role: user.role, message: message, status: 'open', createdAt: nowLabel() }); await saveData(); messageInput.value = ''; status.textContent = 'Sent. Customer service can now review this message.'; }
 
@@ -308,6 +353,9 @@ function bindEvents() {
   on('#requestList', 'click', function(event) { const button = event.target.closest('.accept-request'); if (button && !button.disabled) acceptRide(button.dataset.id); });
   on('#driverActiveTrip', 'click', function(event) { const button = event.target.closest('.trip-action'); if (button && !button.disabled) changeTripStatus(button.dataset.next); });
   on('#pricingForm', 'submit', savePricing);
+  on('#adminUserForm', 'submit', createAdminUser);
+  on('#adminUserRoleInput', 'change', function() { qs('#adminVehicleField').style.display = qs('#adminUserRoleInput').value === 'driver' ? 'grid' : 'none'; });
+  on('#adminUserList', 'click', function(event) { const button = event.target.closest('.delete-user'); if (button && !button.disabled) deleteAdminUser(button.dataset.id); });
   on('#shareDriverLocation', 'click', shareDriverLocation);
   on('#pricingForm', 'input', function() { adminPricingDirty = true; qs('#pricingMessage').textContent = ''; });
   qsa('.support-form').forEach(function(form) { form.addEventListener('submit', submitSupport); });

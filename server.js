@@ -29,6 +29,7 @@ if (databaseUrl) {
 function uid(prefix) { return prefix + '-' + Date.now().toString(36) + '-' + crypto.randomBytes(3).toString('hex'); }
 function nowLabel() { return new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); }
 function normalizePhone(value) { return String(value || '').replace(/\D/g, ''); }
+function isValidPhone(value) { const digits = normalizePhone(value); const local = digits.length === 11 && digits.startsWith('1') ? digits.slice(1) : digits; return /^[2-9]\d{2}[2-9]\d{6}$/.test(local); }
 function hashPassword(password) {
   const iterations = 210000;
   const salt = crypto.randomBytes(16).toString('hex');
@@ -140,6 +141,52 @@ async function handleApi(req, res) {
     data.users.push(user);
     await writeData(data);
     return sendJson(res, 201, { token: signToken(user), user: userPublic(user), state: sanitizeData(data) });
+  }
+  if (url.pathname === '/api/admin/users' && req.method === 'POST') {
+    const auth = await requireUser(req, res); if (!auth) return;
+    if (auth.user.role !== 'admin') return sendJson(res, 403, { error: 'Admin only' });
+    const body = await readBody(req);
+    const role = String(body.role || '').trim();
+    const name = String(body.name || '').trim();
+    const phone = normalizePhone(body.phone);
+    const password = String(body.password || '');
+    const vehicle = String(body.vehicle || '').trim();
+    if (!['passenger', 'driver', 'admin'].includes(role)) return sendJson(res, 400, { error: 'Choose passenger, driver, or admin.' });
+    if (!name) return sendJson(res, 400, { error: 'Enter the user name.' });
+    if (!isValidPhone(phone)) return sendJson(res, 400, { error: 'Enter a valid 10-digit phone number.' });
+    if (password.length < 4) return sendJson(res, 400, { error: 'Password must be at least 4 characters.' });
+    if (role === 'driver' && !vehicle) return sendJson(res, 400, { error: 'Enter vehicle details for the driver.' });
+    if (auth.data.users.some(user => user.role === role && user.phone === phone)) return sendJson(res, 409, { error: 'That user already exists.' });
+    auth.data.users.push({ id: uid('user'), role, name, phone, passwordHash: hashPassword(password), vehicle, online: false, createdAt: nowLabel() });
+    const saved = await writeData(auth.data);
+    return sendJson(res, 201, sanitizeData(saved));
+  }
+  if (url.pathname.startsWith('/api/admin/users/') && req.method === 'DELETE') {
+    const auth = await requireUser(req, res); if (!auth) return;
+    if (auth.user.role !== 'admin') return sendJson(res, 403, { error: 'Admin only' });
+    const userId = decodeURIComponent(url.pathname.slice('/api/admin/users/'.length));
+    const target = auth.data.users.find(user => user.id === userId);
+    if (!target) return sendJson(res, 404, { error: 'User not found.' });
+    if (target.id === auth.user.id) return sendJson(res, 400, { error: 'You cannot delete your own admin account while signed in.' });
+    if (target.role === 'admin' && auth.data.users.filter(user => user.role === 'admin').length <= 1) return sendJson(res, 400, { error: 'At least one admin account is required.' });
+    auth.data.users = auth.data.users.filter(user => user.id !== userId);
+    auth.data.rides = auth.data.rides.map(ride => {
+      const next = Object.assign({}, ride);
+      if (next.passengerId === userId && ['requested', 'accepted', 'arrived', 'started'].includes(next.status)) {
+        next.status = 'cancelled';
+        next.completedAt = next.completedAt || nowLabel();
+      }
+      if (next.driverId === userId) {
+        next.driverId = null;
+        if (['accepted', 'arrived', 'started'].includes(next.status)) {
+          next.status = 'requested';
+          next.acceptedAt = null;
+        }
+      }
+      return next;
+    });
+    const saved = await writeData(auth.data);
+    return sendJson(res, 200, sanitizeData(saved));
   }
   if (url.pathname === '/api/state' && req.method === 'GET') {
     const auth = await requireUser(req, res); if (!auth) return;

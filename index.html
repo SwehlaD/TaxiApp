@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.json" />
     <link rel="apple-touch-icon" href="icons/icon-192.png" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQPDz1xrTdBQn0drqSUiA6MkxQqxE6w=" crossorigin="" />
-    <link rel="stylesheet" href="styles.css?v=21" />
+    <link rel="stylesheet" href="styles.css?v=22" />
   </head>
   <body>
     <main class="app-shell">
@@ -113,6 +113,16 @@
             <button class="primary-button" type="submit">Save pricing</button>
             <p id="pricingMessage" class="message success-message" aria-live="polite"></p>
           </form>
+          <form id="adminUserForm" class="panel form">
+            <h2>Add user</h2>
+            <label>Account type<select id="adminUserRoleInput" required><option value="passenger">Passenger</option><option value="driver">Driver</option><option value="admin">Admin</option></select></label>
+            <label>Full name<input id="adminUserNameInput" type="text" autocomplete="name" placeholder="Full name" required /></label>
+            <label>Phone number<input id="adminUserPhoneInput" type="tel" inputmode="tel" placeholder="5551234567" minlength="10" maxlength="14" required /></label>
+            <label>Password<input id="adminUserPasswordInput" type="password" autocomplete="new-password" placeholder="At least 4 characters" required /></label>
+            <label id="adminVehicleField">Vehicle details<input id="adminUserVehicleInput" type="text" placeholder="Toyota Camry - ABC 123" /></label>
+            <button class="primary-button" type="submit">Create user</button>
+            <p id="adminUserMessage" class="message" aria-live="polite"></p>
+          </form>
           <div class="panel"><h2>Users</h2><div id="adminUserList" class="history-list"></div></div>
           <div class="panel wide-panel"><h2>All rides</h2><div id="adminRideList" class="history-list"></div></div>
           <div class="panel wide-panel"><h2>Customer service inbox</h2><div id="adminSupportList" class="history-list"></div></div>
@@ -121,7 +131,7 @@
     </main>
     <button id="installAppButton" class="install-button" type="button" hidden>Install app</button>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="app.js?v=21"></script>
+    <script src="app.js?v=22"></script>
   </body>
 </html>
 

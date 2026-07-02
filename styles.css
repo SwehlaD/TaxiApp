@@ -15,7 +15,7 @@
 html, body { max-width: 100%; overflow-x: hidden; }
 body { margin: 0; min-height: 100vh; font-family: Arial, Helvetica, sans-serif; color: var(--ink); background: linear-gradient(135deg, #f8fbff 0%, #ffffff 46%, #edf3ff 100%); }
 body::before { content: ""; position: fixed; inset: 0 0 auto; z-index: -1; height: 12px; background: linear-gradient(90deg, #173b78 0 33.33%, #ffffff 33.33% 66.66%, #c1121f 66.66% 100%); box-shadow: 0 1px 0 rgba(17, 24, 39, 0.08); }
-button, input, textarea { font: inherit; } button { cursor: pointer; }
+button, input, textarea, select { font: inherit; } button { cursor: pointer; }
 .app-shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0; }
 .view { display: none; min-height: calc(100vh - 56px); } .view-active { display: block; }
 .hero { position: relative; padding-top: min(10vh, 90px); }
@@ -44,14 +44,14 @@ h1, h2, p { margin-top: 0; } h1 { max-width: 760px; margin-bottom: 0; font-size:
 .segmented { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; padding: 4px; margin-bottom: 16px; background: var(--wash); border: 1px solid var(--line); border-radius: 8px; }
 .segmented button { min-height: 40px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font-weight: 800; } .segmented button.active { background: #fff; color: var(--primary); box-shadow: 0 3px 10px rgba(23, 59, 120, 0.10); }
 .form { display: grid; gap: 15px; } label { display: grid; gap: 8px; color: var(--muted); font-size: 0.9rem; font-weight: 800; }
-input, textarea { width: 100%; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 8px; } input { min-height: 48px; padding: 0 14px; } textarea { min-height: 112px; padding: 12px 14px; resize: vertical; } input:focus, textarea:focus { outline: 3px solid rgba(23, 59, 120, 0.18); border-color: var(--primary); }
+input, textarea, select { width: 100%; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 8px; } input, select { min-height: 48px; padding: 0 14px; } textarea { min-height: 112px; padding: 12px 14px; resize: vertical; } input:focus, textarea:focus, select:focus { outline: 3px solid rgba(23, 59, 120, 0.18); border-color: var(--primary); }
 .message { min-height: 20px; margin: 0; color: var(--danger); font-size: 0.92rem; }
 .workspace { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 18px; align-items: start; } .workspace > *, .panel { min-width: 0; } .wide-panel { grid-column: 1 / -1; }
 .panel-head, .fare-row, .driver-control, .stats, .actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .fare-row { padding: 16px; background: var(--wash); border-radius: 8px; } .fare-row strong { font-size: 1.25rem; }
 .status-card { display: grid; gap: 8px; padding: 18px; background: var(--wash); border-left: 4px solid var(--accent); border-radius: 8px; } .status-card span, .driver-control p, .empty-state, .history-meta { color: var(--muted); }
 .badge { display: inline-flex; width: fit-content; padding: 5px 9px; border-radius: 999px; color: #fff; background: var(--primary); font-size: 0.78rem; font-weight: 800; text-transform: uppercase; }
-.badge.waiting { background: var(--accent); color: #fff; } .badge.cancelled { background: var(--danger); color: #fff; } .badge.done { background: var(--success); color: #fff; } .status-card .badge, .history-card .badge, .request-card .badge { color: #fff; }
+.badge.waiting { background: var(--accent); color: #fff; } .badge.accepted { background: #d99a16; color: #fff; } .badge.cancelled { background: var(--danger); color: #fff; } .badge.done { background: var(--success); color: #fff; } .status-card .badge, .history-card .badge, .request-card .badge { color: #fff; }
 .mini-map { position: relative; height: 260px; margin-top: 18px; overflow: hidden; background: linear-gradient(90deg, rgba(23, 59, 120, 0.06) 1px, transparent 1px), linear-gradient(rgba(23, 59, 120, 0.06) 1px, transparent 1px), #eaf0fa; background-size: 42px 42px; border-radius: 8px; }
 .pin, .car-dot { position: absolute; display: block; border-radius: 50%; } .pin { width: 18px; height: 18px; border: 4px solid #fff; box-shadow: 0 5px 14px rgba(0,0,0,0.18); }
 .pickup-pin { left: 18%; top: 64%; background: var(--primary); } .destination-pin { right: 18%; top: 24%; background: var(--danger); } .route-line { position: absolute; left: 22%; right: 22%; top: 48%; height: 6px; background: var(--accent); border-radius: 99px; transform: rotate(-20deg); } .car-dot { left: 18%; top: 64%; width: 22px; height: 22px; background: var(--ink); transition: all 700ms ease; } .car-dot.matched { left: 42%; top: 48%; } .car-dot.active { left: 74%; top: 26%; }
@@ -99,11 +99,11 @@ input, textarea { width: 100%; color: var(--ink); background: #fff; border: 1px 
 .leaflet-control-attribution a { color: var(--primary); }
 .leaflet-interactive { cursor: pointer; }
 /* Touch and deployment interaction hardening */
-button, a, input, textarea, label, .switch span { -webkit-tap-highlight-color: rgba(23, 59, 120, 0.16); }
+button, a, input, textarea, select, label, .switch span { -webkit-tap-highlight-color: rgba(23, 59, 120, 0.16); }
 button, a, .switch span, .map-link { touch-action: manipulation; }
 button, .map-link { min-width: 44px; }
-button:disabled, button.is-busy { cursor: wait; opacity: 0.68; }
-button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid rgba(193, 18, 31, 0.28); outline-offset: 2px; }
+button:disabled, button.is-busy { cursor: wait; opacity: 0.68; } .delete-user:disabled { cursor: default; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid rgba(193, 18, 31, 0.28); outline-offset: 2px; }
 .role-card, .primary-button, .secondary-button, .danger-button, .success-button, .map-link, .install-button { user-select: none; }
 .switch { display: inline-flex; min-width: 64px; min-height: 44px; align-items: center; justify-content: center; cursor: pointer; touch-action: manipulation; }
 .leaflet-container a, .leaflet-container button { touch-action: manipulation; }
@@ -114,7 +114,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .primary-button, .danger-button, .success-button, .secondary-button, .ghost-button, .back-button, .map-link { width: 100%; min-height: 50px; white-space: normal; }
   .icon-button { width: 50px; height: 50px; min-height: 50px; flex: 0 0 50px; }
   .panel-head { align-items: center; }
-  input { min-height: 52px; font-size: 16px; }
+  input, select { min-height: 52px; font-size: 16px; }
   textarea { font-size: 16px; }
   .real-map { height: 300px; max-width: 100%; }
   .leaflet-container { max-width: 100%; }

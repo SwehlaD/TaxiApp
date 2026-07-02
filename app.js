@@ -129,7 +129,7 @@ function authHeaders() { return session && session.token ? { Authorization: 'Bea
 function loadLocalData() { try { return normalizeData(JSON.parse(localStorage.getItem(STORE_KEY)) || {}); } catch (error) { return normalizeData({}); } }
 function saveLocalData() { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
 function currentUser() { return data.users.find(function(user) { return session && user.id === session.userId; }); }
-function showView(name) { Object.values(views).forEach(function(view) { view.classList.remove('view-active'); }); views[name].classList.add('view-active'); }
+function showView(name) { Object.keys(views).forEach(function(key) { const view = views[key]; const active = key === name; view.classList.toggle('view-active', active); view.hidden = !active; view.setAttribute('aria-hidden', active ? 'false' : 'true'); }); }
 function escapeHtml(value) { return String(value).replace(/[&<>"]/g, function(char) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]; }); }
 function estimatedMiles(pickup, destination) { return Math.max(1, Math.round(((pickup.length + destination.length) / 7) * 10) / 10); }
 function calculateFare(pickup, destination) { const settings = data.settings; const subtotal = settings.baseFare + estimatedMiles(pickup, destination) * settings.perMile + settings.bookingFee; return Math.max(settings.minimumFare, Math.round(subtotal * 100) / 100); }
@@ -137,7 +137,7 @@ function driverPayout(fare) { return Math.round(Number(fare) * (data.settings.dr
 function platformFee(fare) { return Math.round((Number(fare) - driverPayout(fare)) * 100) / 100; }
 
 async function api(path, options) { const response = await fetch(path, Object.assign({ headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()) }, options || {})); const payload = await response.json().catch(function() { return {}; }); if (!response.ok) throw new Error(payload.error || 'Request failed'); return payload; }
-async function loadData() { if (backendAvailable) { try { data = normalizeData(await api('/api/state')); return; } catch (error) { backendAvailable = false; } } data = loadLocalData(); }
+async function loadData() { if (!session || !session.token) { data = loadLocalData(); return; } if (backendAvailable) { try { data = normalizeData(await api('/api/state')); return; } catch (error) { if (/Sign in required|User not found/i.test(error.message || '')) { session = null; saveSession(); data = loadLocalData(); return; } backendAvailable = false; } } data = loadLocalData(); }
 async function saveData() { data = normalizeData(data); if (backendAvailable) { try { data = normalizeData(await api('/api/state', { method: 'PUT', body: JSON.stringify(data) })); return; } catch (error) { backendAvailable = false; } } saveLocalData(); }
 async function refreshDataAndRender() { await loadData(); if (session && currentUser()) enterDashboard(); }
 
@@ -178,6 +178,7 @@ async function handleAuth(event) {
       result = await api('/api/auth/signin', { method: 'POST', body: JSON.stringify({ role: selectedRole, phone, password }) });
     }
     session = { userId: result.user.id, role: result.user.role, token: result.token };
+    backendAvailable = true;
     data = normalizeData(result.state);
     saveSession();
     enterDashboard();
@@ -198,7 +199,6 @@ function renderPassengerStatus() {
   if (!ride) { status.innerHTML = '<strong>No active ride</strong><span>Enter a pickup and destination to request a taxi.</span>'; clearRideMap(); return; }
   const driver = data.users.find(function(user) { return user.id === ride.driverId; });
   renderRideMap(ride, driver);
-  if (car) { if (['accepted', 'arrived'].includes(ride.status)) car.classList.add('matched'); if (ride.status === 'started') car.classList.add('active'); }
   let details = '<span class="badge ' + (ride.status === 'requested' ? 'waiting' : '') + '">' + ride.status + '</span>';
   details += '<strong>' + escapeHtml(ride.pickup) + ' to ' + escapeHtml(ride.destination) + '</strong><span>Fare: ' + money(ride.fare) + '</span>';
   details += driver ? '<span>Driver: ' + escapeHtml(driver.name) + ' | ' + escapeHtml(driver.vehicle || 'Vehicle pending') + '</span>' : '<span>Waiting for an online driver to accept.</span>';
@@ -303,6 +303,7 @@ function bindEvents() {
   window.addEventListener('storage', function(event) { if (event.key === STORE_KEY || event.key === SESSION_KEY) { session = loadSession(); refreshDataAndRender(); } });
 }async function init() { bindEvents(); setupInstallPrompt(); setAuthMode('signin'); await loadData(); if (session && currentUser()) enterDashboard(); if ('serviceWorker' in navigator) window.addEventListener('load', function() { navigator.serviceWorker.register('sw.js').catch(function() {}); }); setInterval(function() { if (session && views[session.role] && views[session.role].classList.contains('view-active')) refreshDataAndRender(); }, 4000); }
 init();
+
 
 
 

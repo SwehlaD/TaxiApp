@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.json" />
     <link rel="apple-touch-icon" href="icons/icon-192.png" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQPDz1xrTdBQn0drqSUiA6MkxQqxE6w=" crossorigin="" />
-    <link rel="stylesheet" href="styles.css?v=14" />
+    <link rel="stylesheet" href="styles.css?v=15" />
   </head>
   <body>
     <main class="app-shell">
@@ -37,7 +37,7 @@
         </div>
       </section>
 
-      <section id="authView" class="view auth-view">
+      <section id="authView" class="view auth-view" hidden aria-hidden="true">
         <button class="back-button" id="authBack" type="button">Back</button>
         <div class="panel auth-panel">
           <p class="eyebrow" id="authRoleLabel">Login</p>
@@ -58,7 +58,7 @@
         </div>
       </section>
 
-      <section id="passengerView" class="view">
+      <section id="passengerView" class="view" hidden aria-hidden="true">
         <header class="topbar"><div><p class="eyebrow">Passenger</p><h1 id="passengerGreeting">Book a ride</h1></div><button class="secondary-button" data-logout type="button">Log out</button></header>
         <div class="workspace">
           <form id="rideForm" class="panel form">
@@ -83,7 +83,7 @@
         </div>
       </section>
 
-      <section id="driverView" class="view">
+      <section id="driverView" class="view" hidden aria-hidden="true">
         <header class="topbar"><div><p class="eyebrow">Driver</p><h1 id="driverGreeting">Driver dashboard</h1></div><button class="secondary-button" data-logout type="button">Log out</button></header>
         <div class="workspace">
           <div class="panel"><div class="driver-control"><div><h2>Availability</h2><p id="driverMode">You are offline</p><p id="driverLocationStatus" class="map-status">Location not shared</p></div><label class="switch"><input id="availabilityToggle" type="checkbox" /><span></span></label></div><button id="shareDriverLocation" class="map-link location-button" type="button">Share my location</button><div class="stats"><div><span>Today</span><strong id="driverEarnings">$0</strong></div><div><span>Trips</span><strong id="driverTrips">0</strong></div></div></div>
@@ -99,7 +99,7 @@
         </div>
       </section>
 
-      <section id="adminView" class="view">
+      <section id="adminView" class="view" hidden aria-hidden="true">
         <header class="topbar"><div><p class="eyebrow">Admin</p><h1>Operations dashboard</h1></div><button class="secondary-button" data-logout type="button">Log out</button></header>
         <div class="workspace admin-workspace">
           <div class="panel wide-panel"><h2>Business snapshot</h2><div class="stats admin-stats"><div><span>Total users</span><strong id="adminUsers">0</strong></div><div><span>Total rides</span><strong id="adminRides">0</strong></div><div><span>Revenue</span><strong id="adminRevenue">$0</strong></div><div><span>Open requests</span><strong id="adminOpenRides">0</strong></div></div></div>
@@ -121,8 +121,9 @@
     </main>
     <button id="installAppButton" class="install-button" type="button" hidden>Install app</button>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="app.js?v=14"></script>
+    <script src="app.js?v=15"></script>
   </body>
 </html>
+
 
 

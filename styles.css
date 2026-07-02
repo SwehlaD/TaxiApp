@@ -73,7 +73,7 @@ input, textarea { width: 100%; color: var(--ink); background: #fff; border: 1px 
 .fallback-marker.destination { background: var(--danger); }
 .fallback-marker.taxi { background: var(--accent); color: #ffffff; }
 @media (max-width: 920px) { .three-up, .admin-stats { grid-template-columns: 1fr; } }
-@media (max-width: 760px) { .app-shell { width: min(100% - 24px, 1120px); padding: 18px 0; } .topbar { display: grid; grid-template-columns: 1fr; align-items: stretch; gap: 12px; } .topbar .secondary-button { justify-self: stretch; } .role-grid, .workspace { grid-template-columns: minmax(0, 1fr); } .role-grid { margin-top: 28px; } .role-card { min-height: 136px; } .actions { align-items: stretch; flex-direction: column; } .driver-control { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; } .driver-control .switch { justify-self: end; } .driver-control p { margin-bottom: 4px; } .wide-panel { grid-column: auto; } }
+@media (max-width: 760px) { .app-shell { width: min(100% - 24px, 1120px); padding: 18px 0 88px; } .topbar { display: grid; grid-template-columns: 1fr; align-items: stretch; gap: 12px; } .topbar .secondary-button { justify-self: stretch; } .role-grid, .workspace { grid-template-columns: minmax(0, 1fr); } .role-grid { margin-top: 28px; } .role-card { min-height: 136px; } .actions { align-items: stretch; flex-direction: column; } .driver-control { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; } .driver-control .switch { justify-self: end; } .driver-control p { margin-bottom: 4px; } .wide-panel { grid-column: auto; } }
 /* Local Leaflet layout fallback so maps render correctly even if CDN CSS is blocked. */
 .leaflet-container { position: relative; overflow: hidden; background: #dfe8f2; outline-offset: 1px; font-family: Arial, Helvetica, sans-serif; }
 .leaflet-pane, .leaflet-tile, .leaflet-marker-icon, .leaflet-marker-shadow, .leaflet-tile-container, .leaflet-pane > svg, .leaflet-pane > canvas, .leaflet-zoom-box, .leaflet-image-layer, .leaflet-layer { position: absolute; left: 0; top: 0; }
@@ -122,4 +122,60 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .stats div { padding: 14px; }
   .location-button { margin-top: 12px; }
   .history-card, .request-card, .status-card { overflow-wrap: anywhere; }
+}
+/* Phone-first app polish for installed/mobile use. */
+@media (max-width: 560px) {
+  body { background: #f8fbff; }
+  .app-shell { width: 100%; padding: 14px 12px 88px; }
+  .view { min-height: calc(100vh - 28px); }
+  .hero { padding-top: 34px; }
+  .hero::after { width: 108px; height: 7px; margin-top: 18px; }
+  h1 { max-width: none; font-size: 1.85rem; line-height: 1.08; }
+  h2 { font-size: 1.22rem; line-height: 1.15; }
+  .hero-copy { margin-top: 14px; font-size: 1rem; line-height: 1.45; }
+  .role-grid { gap: 12px; margin-top: 24px; }
+  .role-card { min-height: auto; gap: 12px; padding: 16px; align-items: flex-start; box-shadow: 0 10px 24px rgba(23, 59, 120, 0.10); }
+  .role-icon { flex-basis: 46px; width: 46px; height: 46px; }
+  .role-card strong { margin-bottom: 5px; font-size: 1.12rem; }
+  .role-card small { font-size: 0.92rem; line-height: 1.35; }
+  .auth-view.view-active { display: block; }
+  .auth-panel { width: 100%; }
+  .back-button { position: static; margin-bottom: 12px; }
+  .panel { padding: 16px; box-shadow: 0 10px 24px rgba(23, 59, 120, 0.08); }
+  .topbar { margin-bottom: 14px; }
+  .topbar h1 { font-size: 1.42rem; line-height: 1.12; }
+  .workspace { gap: 12px; }
+  .panel-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .panel-head h2 { margin-bottom: 0; }
+  .fare-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; padding: 14px; }
+  .driver-control { gap: 10px; }
+  .driver-control h2 { margin-bottom: 8px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+  .stats div { padding: 12px; }
+  .stats strong { font-size: 1.35rem; }
+  .status-card { padding: 14px; }
+  .empty-state { padding: 18px 12px; }
+  .request-card, .history-card { padding: 14px; }
+  .admin-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .admin-stats div { padding: 12px; }
+  .real-map { height: 260px; }
+  .segmented { grid-template-columns: 1fr; }
+  .segmented button { min-height: 44px; }
+  input { min-height: 50px; }
+  textarea { min-height: 104px; }
+  .install-button { left: 12px; right: 12px; bottom: 12px; width: auto; border-radius: 8px; }
+}
+
+@media (max-width: 380px) {
+  .app-shell { padding-left: 10px; padding-right: 10px; }
+  h1 { font-size: 1.65rem; }
+  .topbar h1 { font-size: 1.28rem; }
+  .panel { padding: 14px; }
+  .role-card { padding: 14px; }
+  .role-icon { flex-basis: 42px; width: 42px; height: 42px; }
+  .stats, .admin-stats { gap: 8px; }
+  .stats div, .admin-stats div { padding: 10px; }
+  .stats strong { font-size: 1.2rem; }
+  .primary-button, .danger-button, .success-button, .secondary-button, .ghost-button, .back-button, .map-link { padding-left: 10px; padding-right: 10px; }
+  .real-map { height: 230px; }
 }

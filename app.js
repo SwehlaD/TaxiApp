@@ -129,7 +129,7 @@ function authHeaders() { return session && session.token ? { Authorization: 'Bea
 function loadLocalData() { try { return normalizeData(JSON.parse(localStorage.getItem(STORE_KEY)) || {}); } catch (error) { return normalizeData({}); } }
 function saveLocalData() { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
 function currentUser() { return data.users.find(function(user) { return session && user.id === session.userId; }); }
-function showView(name) { Object.keys(views).forEach(function(key) { const view = views[key]; const active = key === name; view.classList.toggle('view-active', active); view.hidden = !active; view.setAttribute('aria-hidden', active ? 'false' : 'true'); }); }
+function showView(name) { Object.keys(views).forEach(function(key) { const view = views[key]; const active = key === name; view.classList.toggle('view-active', active); view.hidden = !active; view.setAttribute('aria-hidden', active ? 'false' : 'true'); }); const installButton = qs('#installAppButton'); if (installButton) { const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; const mobileLike = window.matchMedia('(max-width: 760px)').matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent); installButton.hidden = Boolean(standalone) || !mobileLike || Boolean(session && session.token) || ['passenger', 'driver', 'admin'].includes(name); } }
 function escapeHtml(value) { return String(value).replace(/[&<>"]/g, function(char) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]; }); }
 function estimatedMiles(pickup, destination) { return Math.max(1, Math.round(((pickup.length + destination.length) / 7) * 10) / 10); }
 function calculateFare(pickup, destination) { const settings = data.settings; const subtotal = settings.baseFare + estimatedMiles(pickup, destination) * settings.perMile + settings.bookingFee; return Math.max(settings.minimumFare, Math.round(subtotal * 100) / 100); }
@@ -264,22 +264,33 @@ async function submitSupport(event) { event.preventDefault(); const form = event
 
 function setupInstallPrompt() {
   const installButton = qs('#installAppButton');
+  if (!installButton) return;
+  const standalone = function() { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; };
+  const mobileLike = function() { return window.matchMedia('(max-width: 760px)').matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent); };
+  const showInstallButton = function() { installButton.hidden = Boolean(standalone()) || !mobileLike() || Boolean(session && session.token); };
   window.addEventListener('beforeinstallprompt', function(event) {
     event.preventDefault();
     deferredInstallPrompt = event;
-    installButton.hidden = false;
+    showInstallButton();
   });
   installButton.addEventListener('click', async function() {
-    if (!deferredInstallPrompt) return;
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt = null;
-    installButton.hidden = true;
+    if (standalone()) { installButton.hidden = true; return; }
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      showInstallButton();
+      return;
+    }
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) alert('To install on iPhone: tap Share, then Add to Home Screen.');
+    else alert('To install: open your browser menu and choose Install app or Add to Home screen.');
   });
   window.addEventListener('appinstalled', function() {
     deferredInstallPrompt = null;
     installButton.hidden = true;
   });
+  window.addEventListener('resize', showInstallButton);
+  setTimeout(showInstallButton, 1200);
 }
 
 function bindEvents() {

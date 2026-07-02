@@ -1,9 +1,15 @@
-﻿services:
+databases:
+  - name: taxi-app-db
+    plan: free
+
+services:
   - type: web
     name: taxi-app
-    env: node
+    runtime: node
+    plan: free
     buildCommand: npm install
     startCommand: npm start
+    healthCheckPath: /health
     envVars:
       - key: APP_SECRET
         generateValue: true
@@ -12,4 +18,6 @@
       - key: ADMIN_PASSWORD
         sync: false
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: taxi-app-db
+          property: connectionString

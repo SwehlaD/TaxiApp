@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Local live app data and backups
+taxi-data.json
+backups/
+pre-production-backup-*/
+
+# Local tunnel/testing tools and logs
+.tools/
+*.log
+
+# Local databases if added later
+*.db
+*.sqlite
+*.sqlite3
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

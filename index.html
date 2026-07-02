@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#173b78" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Americab" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Americab Taxi Salem</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQPDz1xrTdBQn0drqSUiA6MkxQqxE6w=" crossorigin="" />
+    <link rel="stylesheet" href="styles.css?v=14" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section id="welcomeView" class="view view-active">
+        <header class="hero">
+          <p class="eyebrow">Americab Taxi Salem</p>
+          <h1>Quality transportation in Salem</h1>
+          <p class="hero-copy">Book reliable local taxi service, airport transportation, and North Shore rides with Americab Taxi Salem.</p>
+        </header>
+        <div class="role-grid three-up">
+          <button class="role-card" data-role="passenger" type="button">
+            <span class="role-icon">P</span>
+            <span><strong>Passenger</strong><small>Request a safe Americab ride, track status, cancel rides, and view trip history.</small></span>
+          </button>
+          <button class="role-card" data-role="driver" type="button">
+            <span class="role-icon">D</span>
+            <span><strong>Driver</strong><small>Serve Salem and North Shore passengers, manage trips, and track earnings.</small></span>
+          </button>
+          <button class="role-card" data-role="admin" type="button">
+            <span class="role-icon">A</span>
+            <span><strong>Admin</strong><small>Change Americab pricing, review rides, and manage operations.</small></span>
+          </button>
+        </div>
+      </section>
+
+      <section id="authView" class="view auth-view">
+        <button class="back-button" id="authBack" type="button">Back</button>
+        <div class="panel auth-panel">
+          <p class="eyebrow" id="authRoleLabel">Login</p>
+          <h2 id="authTitle">Welcome back</h2>
+          <div class="segmented" id="authModeTabs" role="tablist" aria-label="Authentication mode">
+            <button id="signInTab" class="active" type="button">Sign in</button>
+            <button id="createTab" type="button">Create account</button>
+          </div>
+          <form id="authForm" class="form">
+            <label id="nameField">Full name<input id="nameInput" type="text" autocomplete="name" placeholder="Your name" /></label>
+            <label>Phone number<input id="phoneInput" type="tel" autocomplete="tel" inputmode="tel" placeholder="5551234567" minlength="10" maxlength="14" required /></label>
+            <label>Password<input id="passwordInput" type="password" autocomplete="current-password" placeholder="At least 4 characters" required /></label>
+            <label id="confirmPasswordField">Confirm password<input id="confirmPasswordInput" type="password" autocomplete="new-password" placeholder="Type password again" /></label>
+            <label id="vehicleField">Vehicle details<input id="vehicleInput" type="text" placeholder="Toyota Camry - ABC 123" /></label>
+            <p id="authMessage" class="message" aria-live="polite"></p>
+            <button class="primary-button" id="authSubmit" type="submit">Sign in</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="passengerView" class="view">
+        <header class="topbar"><div><p class="eyebrow">Passenger</p><h1 id="passengerGreeting">Book a ride</h1></div><button class="secondary-button" data-logout type="button">Log out</button></header>
+        <div class="workspace">
+          <form id="rideForm" class="panel form">
+            <h2>New trip</h2>
+            <label>Pickup<input id="pickupInput" type="text" autocomplete="street-address" placeholder="123 Main St, Salem, MA" minlength="6" required /></label>
+            <label>Destination<input id="destinationInput" type="text" autocomplete="street-address" placeholder="Boston Logan Airport, Boston, MA" minlength="6" required /></label>
+            <div class="fare-row"><span>Estimated fare</span><strong id="fareEstimate">$0.00</strong></div>
+            <button class="primary-button" type="submit">Request taxi</button>
+          </form>
+          <div class="panel">
+            <div class="panel-head"><h2>Current ride</h2><button id="refreshPassenger" class="icon-button" type="button" title="Refresh">R</button></div>
+            <div id="passengerStatus" class="status-card"></div>
+            <div id="rideMap" class="real-map" aria-label="Ride map"></div><p id="mapStatus" class="map-status">Map will appear when a ride is active.</p>
+          </div>
+          <form id="passengerSupportForm" class="panel form support-form" data-support-role="passenger">
+            <h2>Customer service</h2>
+            <label>What do you need help with?<textarea name="message" placeholder="Describe the issue with your ride, account, or payment." minlength="8" required></textarea></label>
+            <button class="primary-button" type="submit">Send to support</button>
+            <p class="message success-message" data-support-message></p>
+          </form>
+          <div class="panel wide-panel"><h2>Trip history</h2><div id="passengerHistory" class="history-list"></div></div>
+        </div>
+      </section>
+
+      <section id="driverView" class="view">
+        <header class="topbar"><div><p class="eyebrow">Driver</p><h1 id="driverGreeting">Driver dashboard</h1></div><button class="secondary-button" data-logout type="button">Log out</button></header>
+        <div class="workspace">
+          <div class="panel"><div class="driver-control"><div><h2>Availability</h2><p id="driverMode">You are offline</p><p id="driverLocationStatus" class="map-status">Location not shared</p></div><label class="switch"><input id="availabilityToggle" type="checkbox" /><span></span></label></div><button id="shareDriverLocation" class="map-link location-button" type="button">Share my location</button><div class="stats"><div><span>Today</span><strong id="driverEarnings">$0</strong></div><div><span>Trips</span><strong id="driverTrips">0</strong></div></div></div>
+          <div class="panel"><h2>Open requests</h2><div id="requestList" class="request-list"></div></div>
+          <div class="panel wide-panel"><h2>Active trip</h2><div id="driverActiveTrip" class="status-card"></div></div>
+          <form id="driverSupportForm" class="panel form support-form wide-panel" data-support-role="driver">
+            <h2>Customer service</h2>
+            <label>What do you need help with?<textarea name="message" placeholder="Describe the issue with a passenger, trip, payout, or account." minlength="8" required></textarea></label>
+            <button class="primary-button" type="submit">Send to support</button>
+            <p class="message success-message" data-support-message></p>
+          </form>
+          <div class="panel wide-panel"><h2>Completed trips</h2><div id="driverHistory" class="history-list"></div></div>
+        </div>
+      </section>
+
+      <section id="adminView" class="view">
+        <header class="topbar"><div><p class="eyebrow">Admin</p><h1>Operations dashboard</h1></div><button class="secondary-button" data-logout type="button">Log out</button></header>
+        <div class="workspace admin-workspace">
+          <div class="panel wide-panel"><h2>Business snapshot</h2><div class="stats admin-stats"><div><span>Total users</span><strong id="adminUsers">0</strong></div><div><span>Total rides</span><strong id="adminRides">0</strong></div><div><span>Revenue</span><strong id="adminRevenue">$0</strong></div><div><span>Open requests</span><strong id="adminOpenRides">0</strong></div></div></div>
+          <form id="pricingForm" class="panel form">
+            <h2>Pricing controls</h2>
+            <label>Base fare<input id="baseFareInput" type="number" min="0" step="0.01" required /></label>
+            <label>Per mile<input id="perMileInput" type="number" min="0" step="0.01" required /></label>
+            <label>Booking fee<input id="bookingFeeInput" type="number" min="0" step="0.01" required /></label>
+            <label>Minimum fare<input id="minimumFareInput" type="number" min="0" step="0.01" required /></label>
+            <label>Driver commission %<input id="driverCommissionInput" type="number" min="0" max="100" step="1" required /></label>
+            <button class="primary-button" type="submit">Save pricing</button>
+            <p id="pricingMessage" class="message success-message" aria-live="polite"></p>
+          </form>
+          <div class="panel"><h2>Users</h2><div id="adminUserList" class="history-list"></div></div>
+          <div class="panel wide-panel"><h2>All rides</h2><div id="adminRideList" class="history-list"></div></div>
+          <div class="panel wide-panel"><h2>Customer service inbox</h2><div id="adminSupportList" class="history-list"></div></div>
+        </div>
+      </section>
+    </main>
+    <button id="installAppButton" class="install-button" type="button" hidden>Install app</button>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="app.js?v=14"></script>
+  </body>
+</html>
+
+

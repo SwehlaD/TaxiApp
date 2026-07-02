@@ -1,0 +1,15 @@
+﻿services:
+  - type: web
+    name: taxi-app
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: APP_SECRET
+        generateValue: true
+      - key: ADMIN_PHONE
+        value: "2223334444"
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DATABASE_URL
+        sync: false

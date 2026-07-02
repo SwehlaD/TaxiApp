@@ -1,4 +1,4 @@
-const CACHE_NAME = 'taxi-app-v22';
+const CACHE_NAME = 'taxi-app-v23';
 const ASSETS = ['./', './index.html', './styles.css', './app.js', './manifest.json', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', function(event) {
